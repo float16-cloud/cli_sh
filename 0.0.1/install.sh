@@ -72,7 +72,6 @@ update_path() {
 main() {
     detect_platform
     download_binary
-    install_binary
     update_path
     echo "Installation complete! Please restart your terminal."
 }
