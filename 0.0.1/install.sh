@@ -35,6 +35,7 @@ get_install_path() {
 
 # Download binary
 download_binary() {
+    INSTALL_PATH="$(get_install_path)"
     DOWNLOAD_URL="$BASE_URL/float16-cli-$OS-$ARCH-$VERSION"
     if [ "$OS" = "win" ]; then
         DOWNLOAD_URL="$DOWNLOAD_URL.exe"
@@ -42,9 +43,9 @@ download_binary() {
 
     echo "Downloading from: $DOWNLOAD_URL"
     if command -v curl &> /dev/null; then
-        curl -L -o "$BINARY_NAME" "$DOWNLOAD_URL"
+        curl -L -o "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"
     elif command -v wget &> /dev/null; then
-        wget -O "$BINARY_NAME" "$DOWNLOAD_URL"
+        wget -O "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"
     else
         echo "Error: curl or wget required"
         exit 1
@@ -54,7 +55,6 @@ download_binary() {
 # Install binary
 install_binary() {
     INSTALL_PATH="$(get_install_path)"
-    mkdir -p "$INSTALL_PATH"
 
     if [ "$OS" = "win" ]; then
         mv "$BINARY_NAME" "$INSTALL_PATH/$BINARY_NAME.exe"
@@ -69,7 +69,7 @@ update_path() {
     INSTALL_PATH="$(get_install_path)"
     
     case "$OS" in
-        linux|darwin)
+        linux|mac)
             SHELL_RC="$HOME/.bashrc"
             [ -f "$HOME/.zshrc" ] && SHELL_RC="$HOME/.zshrc"
             echo "export PATH=\$PATH:$INSTALL_PATH" >> "$SHELL_RC"
