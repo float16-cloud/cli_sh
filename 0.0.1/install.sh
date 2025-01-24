@@ -52,17 +52,6 @@ download_binary() {
     fi
 }
 
-# Install binary
-install_binary() {
-    INSTALL_PATH="$(get_install_path)"
-
-    if [ "$OS" = "win" ]; then
-        mv "$BINARY_NAME" "$INSTALL_PATH/$BINARY_NAME.exe"
-    else
-        chmod +x "$BINARY_NAME"
-        sudo mv "$BINARY_NAME" "$INSTALL_PATH/$BINARY_NAME"
-    fi
-}
 
 # Update PATH
 update_path() {
