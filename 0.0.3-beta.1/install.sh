@@ -43,9 +43,9 @@ download_binary() {
 
     echo "Downloading from: $DOWNLOAD_URL"
     if command -v curl &> /dev/null; then
-        curl -L -o "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"
+        sudo curl -L -o "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"
     elif command -v wget &> /dev/null; then
-        wget -O "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"
+        sudo wget -O "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"
     else
         echo "Error: curl or wget required"
         exit 1
