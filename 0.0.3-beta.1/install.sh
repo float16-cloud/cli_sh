@@ -50,6 +50,11 @@ download_binary() {
         echo "Error: curl or wget required"
         exit 1
     fi
+
+    # Add executable permissions for all users
+    if [ "$OS" != "win" ]; then
+        sudo chmod 755 "$INSTALL_PATH/$BINARY_NAME"
+    fi
 }
 
 
