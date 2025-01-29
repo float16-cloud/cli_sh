@@ -42,12 +42,21 @@ download_binary() {
     fi
 
     echo "Downloading from: $DOWNLOAD_URL"
+    if ! sudo mkdir -p "$INSTALL_PATH"; then
+        echo "Error: Failed to create installation directory"
+        exit 1
+    fi
+
     if command -v curl &> /dev/null; then
-        sudo mkdir -p "$INSTALL_PATH"
-        sudo curl -L -o "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"
+        if ! sudo curl -L -o "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"; then
+            echo "Error: Failed to download binary using curl"
+            exit 1
+        fi
     elif command -v wget &> /dev/null; then
-        sudo mkdir -p "$INSTALL_PATH"
-        sudo wget -O "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"
+        if ! sudo wget -O "$INSTALL_PATH/$BINARY_NAME" "$DOWNLOAD_URL"; then
+            echo "Error: Failed to download binary using wget"
+            exit 1
+        fi
     else
         echo "Error: curl or wget required"
         exit 1
@@ -55,7 +64,16 @@ download_binary() {
 
     # Add executable permissions for all users
     if [ "$OS" != "win" ]; then
-        sudo chmod 755 "$INSTALL_PATH/$BINARY_NAME"
+        if ! sudo chmod 755 "$INSTALL_PATH/$BINARY_NAME"; then
+            echo "Error: Failed to set executable permissions"
+            exit 1
+        fi
+    fi
+
+    # Verify the binary exists and is executable
+    if [ ! -f "$INSTALL_PATH/$BINARY_NAME" ]; then
+        echo "Error: Binary not found after installation"
+        exit 1
     fi
 }
 
@@ -68,18 +86,38 @@ update_path() {
         linux|mac)
             SHELL_RC="$HOME/.bashrc"
             [ -f "$HOME/.zshrc" ] && SHELL_RC="$HOME/.zshrc"
-            echo "export PATH=\$PATH:$INSTALL_PATH" >> "$SHELL_RC"
+            if ! echo "export PATH=\$PATH:$INSTALL_PATH" >> "$SHELL_RC"; then
+                echo "Error: Failed to update PATH in shell configuration"
+                exit 1
+            fi
             ;;
         windows)
-            setx PATH "%PATH%;$INSTALL_PATH"
+            if ! setx PATH "%PATH%;$INSTALL_PATH"; then
+                echo "Error: Failed to update PATH in Windows"
+                exit 1
+            fi
             ;;
     esac
 }
 
 main() {
-    detect_platform
-    download_binary
-    update_path
+    if ! detect_platform; then
+        echo "Error: Failed to detect platform"
+        exit 1
+    fi
+    
+    echo "Installing float16 version $VERSION for $OS-$ARCH..."
+    
+    if ! download_binary; then
+        echo "Error: Installation failed during binary download"
+        exit 1
+    fi
+    
+    if ! update_path; then
+        echo "Error: Installation failed during PATH update"
+        exit 1
+    fi
+    
     echo "Installation complete! Please restart your terminal."
 }
 
